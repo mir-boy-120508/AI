@@ -22,7 +22,6 @@
     <div id="audioContainer"></div>
 
     <script>
-        // あなたのCloudflare WorkersのURLをあらかじめ設定しました
         const WORKER_URL = "https://tight-glade-fd43.mir-boy-20120508.workers.dev"; 
 
         document.getElementById('generateBtn').addEventListener('click', async () => {
@@ -34,8 +33,8 @@
             audioContainer.innerHTML = "";
 
             try {
-                // 1. 曲の作成を依頼
-                const response = await fetch(`${WORKER_URL}/api/generate`, {
+                // 1. 曲の作成を依頼（URLの後ろには何もつけない）
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt: promptText })
@@ -48,7 +47,8 @@
                 while (data.status !== 'succeeded' && data.status !== 'failed') {
                     await new Promise(resolve => setTimeout(resolve, 3000)); // 3秒待つ
                     
-                    const checkRes = await fetch(`${WORKER_URL}/api/status/${predictionId}`);
+                    // ?id= の形式でチェックする（404を絶対に出さない工夫）
+                    const checkRes = await fetch(`${WORKER_URL}?id=${predictionId}`);
                     data = await checkRes.json();
                     statusDiv.innerText = `現在の状態: ${data.status}...`;
                 }
@@ -56,7 +56,7 @@
                 // 3. 完成したらMP3を画面に出して鳴らす！
                 if (data.status === 'succeeded') {
                     statusDiv.innerText = "完成しました！";
-                    const audioUrl = data.output; // AIが作った音ファイルのURL
+                    const audioUrl = data.output;
                     audioContainer.innerHTML = `<audio controls src="${audioUrl}"></audio>`;
                 } else {
                     statusDiv.innerText = "生成に失敗しました。";
