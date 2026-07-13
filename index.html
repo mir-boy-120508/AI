@@ -22,7 +22,7 @@
     <div id="audioContainer"></div>
 
     <script>
-        // ★ここにCloudflare WorkersのURLを貼り付けてください（最後に / は不要です）
+        // あなたのCloudflare WorkersのURLをあらかじめ設定しました
         const WORKER_URL = "https://tight-glade-fd43.mir-boy-20120508.workers.dev"; 
 
         document.getElementById('generateBtn').addEventListener('click', async () => {
@@ -34,7 +34,7 @@
             audioContainer.innerHTML = "";
 
             try {
-                // 1. あなたの安全なCloudflare Workers（中継サーバー）に曲の作成を依頼
+                // 1. 曲の作成を依頼
                 const response = await fetch(`${WORKER_URL}/api/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -44,7 +44,7 @@
                 let data = await response.json();
                 const predictionId = data.id;
 
-                // 2. AIの計算が終わるまで、数秒おきにCloudflare経由で「できた？」とチェックする
+                // 2. AIの計算が終わるまで、数秒おきに「できた？」とチェックする
                 while (data.status !== 'succeeded' && data.status !== 'failed') {
                     await new Promise(resolve => setTimeout(resolve, 3000)); // 3秒待つ
                     
@@ -64,7 +64,7 @@
 
             } catch (error) {
                 console.error(error);
-                statusDiv.innerText = "エラーが発生しました。コンソールを確認してください。";
+                statusDiv.innerText = "エラーが発生しました。";
             }
         });
     </script>
